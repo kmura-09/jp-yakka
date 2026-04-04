@@ -157,7 +157,8 @@
 
 <div id="tabs">
   <button class="tab-btn active" data-tab="list">一覧</button>
-  <button class="tab-btn" data-tab="diff">差分（改定前後比較）</button>
+  <button class="tab-btn" data-tab="diff">差分（改定前後）</button>
+  <button class="tab-btn" data-tab="compare">先発・後発比較</button>
 </div>
 
 <div id="legend">
@@ -525,6 +526,170 @@ DIFFS.forEach(d => {
 });
 diffVerSel.addEventListener("change", () => loadDiff(diffVerSel.value));
 loadDiff(DIFFS[0].file);
+</script>
+<!-- ===== 比較パネル ===== -->
+<div id="panel-compare" class="panel">
+  <div class="controls">
+    <input type="text" id="cq" placeholder="成分名・品名で検索...">
+    <select id="ckubun">
+      <option value="">区分：すべて</option>
+      <option value="内用薬">内用薬</option>
+      <option value="外用薬">外用薬</option>
+      <option value="注射薬">注射薬</option>
+      <option value="歯科用薬剤">歯科用薬剤</option>
+    </select>
+    <select id="ctype">
+      <option value="">差額：すべて</option>
+      <option value="loss">先発の方が高い（後発に切替で節約可）</option>
+      <option value="same">先発＝最安後発（同額）</option>
+      <option value="rev">後発の方が高い</option>
+    </select>
+    <div class="spacer"></div>
+    <select id="compare-version"></select>
+  </div>
+  <div id="compare-stats" class="diff-stats"></div>
+  <div id="compare-summary" style="padding:7px 20px;font-size:12px;color:#666;background:#f5f6f8;"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-ccol="kubun">区分</th>
+          <th data-ccol="seibun">成分名</th>
+          <th data-ccol="kikaku">規格</th>
+          <th data-ccol="senpatu_hinmei">先発品名</th>
+          <th data-ccol="senpatu_maker">メーカー</th>
+          <th data-ccol="senpatu_yakka">先発薬価</th>
+          <th data-ccol="kouhatsu_count">後発品数</th>
+          <th data-ccol="kouhatsu_min">最安後発</th>
+          <th data-ccol="diff">差額（先発－最安後発）</th>
+        </tr>
+      </thead>
+      <tbody id="compare-tbody"></tbody>
+    </table>
+    <div id="empty-compare">該当する品目がありません</div>
+  </div>
+</div>
+
+<script>
+// ===== 比較 =====
+const COMPARES = [
+  { label: "2026年4月1日",  file: "data/compare_20260401.json" },
+  { label: "2026年3月18日", file: "data/compare_20260318.json" },
+];
+
+let compareRows = [], compareFiltered = [], compareSortCol = null, compareSortDir = 1, comparePage = 0;
+
+async function loadCompare(file) {
+  const res = await fetch(file);
+  const json = await res.json();
+  compareRows = json.rows;
+
+  const loss = compareRows.filter(r => r.diff > 0).length;
+  const same = compareRows.filter(r => r.dougaku).length;
+  const rev  = compareRows.filter(r => r.diff < 0).length;
+  document.getElementById("compare-stats").innerHTML = `
+    <span>先発が高い（節約余地あり） <b>${loss}</b> 件</span>
+    <span>先発＝最安後発（同額） <b>${same}</b> 件</span>
+    <span>後発の方が高い <b>${rev}</b> 件</span>
+  `;
+  applyCompareFilter();
+}
+
+function applyCompareFilter() {
+  const q     = document.getElementById("cq").value.trim().toLowerCase();
+  const kubun = document.getElementById("ckubun").value;
+  const ctype = document.getElementById("ctype").value;
+
+  compareFiltered = compareRows.filter(r => {
+    if (kubun && r.kubun !== kubun) return false;
+    if (ctype === "loss" && r.diff <= 0) return false;
+    if (ctype === "same" && !r.dougaku) return false;
+    if (ctype === "rev"  && r.diff >= 0) return false;
+    if (q && !(r.seibun + r.senpatu_hinmei).toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (compareSortCol) {
+    compareFiltered.sort((a, b) => {
+      const av = a[compareSortCol] ?? "", bv = b[compareSortCol] ?? "";
+      if (typeof av === "number") return (av - bv) * compareSortDir;
+      return String(av).localeCompare(String(bv), "ja") * compareSortDir;
+    });
+  }
+  comparePage = 0;
+  renderCompare();
+}
+
+function renderCompare() {
+  const tbody = document.getElementById("compare-tbody");
+  const slice = compareFiltered.slice(0, (comparePage + 1) * PAGE);
+  document.getElementById("compare-summary").textContent =
+    `${compareFiltered.length.toLocaleString()} 件表示`;
+
+  tbody.innerHTML = slice.map(r => {
+    const diffVal = r.diff;
+    let diffCell;
+    if (diffVal === 0) {
+      diffCell = `<span class="badge badge-dougaku">同額</span>`;
+    } else if (diffVal > 0) {
+      diffCell = `<span class="delta delta-up">+${diffVal.toFixed(1)} 円</span>`;
+    } else {
+      diffCell = `<span class="delta delta-down">${diffVal.toFixed(1)} 円</span>`;
+    }
+    const typeLabel = r.senpatu_type === "準先発品"
+      ? `<span class="badge badge-junsenpatu">準先発品</span>`
+      : `<span class="badge badge-senpatu">先発品</span>`;
+    return `<tr>
+      <td>${r.kubun}</td>
+      <td>${r.seibun}</td>
+      <td>${r.kikaku}</td>
+      <td>${r.senpatu_hinmei} ${typeLabel}</td>
+      <td>${r.senpatu_maker}</td>
+      <td class="yakka">${r.senpatu_yakka.toFixed(1)} 円</td>
+      <td style="text-align:right">${r.kouhatsu_count}</td>
+      <td class="yakka">${r.kouhatsu_min.toFixed(1)} 円</td>
+      <td class="yakka">${diffCell}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("empty-compare").style.display =
+    compareFiltered.length === 0 ? "block" : "none";
+}
+
+// ソート（比較）
+document.querySelectorAll("th[data-ccol]").forEach(th => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.ccol;
+    if (compareSortCol === col) compareSortDir *= -1;
+    else { compareSortCol = col; compareSortDir = 1; }
+    document.querySelectorAll("#panel-compare thead th").forEach(t =>
+      t.classList.remove("sorted-asc","sorted-desc"));
+    th.classList.add(compareSortDir === 1 ? "sorted-asc" : "sorted-desc");
+    applyCompareFilter();
+  });
+});
+
+["cq","ckubun","ctype"].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", applyCompareFilter);
+  el.addEventListener("change", applyCompareFilter);
+});
+
+const cmpVerSel = document.getElementById("compare-version");
+COMPARES.forEach(c => {
+  const opt = document.createElement("option");
+  opt.value = c.file; opt.textContent = c.label;
+  cmpVerSel.appendChild(opt);
+});
+cmpVerSel.addEventListener("change", () => loadCompare(cmpVerSel.value));
+loadCompare(COMPARES[0].file);
+
+// 無限スクロール（比較）に追加
+const origScroll = window.onscroll;
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+    if ((comparePage + 1) * PAGE < compareFiltered.length) { comparePage++; renderCompare(); }
+  }
+});
 </script>
 </body>
 </html>
