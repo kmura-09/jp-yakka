@@ -19,111 +19,32 @@
     color: #fff;
     padding: 12px 20px;
     display: flex;
-    align-items: baseline;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
   }
   header h1 { font-size: 18px; font-weight: 700; }
-  header span { font-size: 12px; opacity: .7; }
 
-  #controls {
-    background: #fff;
-    border-bottom: 1px solid #dde1e7;
-    padding: 12px 20px;
+  /* タブ */
+  #tabs {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-  }
-
-  #controls input[type=text] {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 6px 10px;
-    width: 260px;
-    font-size: 14px;
-  }
-
-  #controls select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-size: 14px;
+    gap: 0;
     background: #fff;
+    border-bottom: 2px solid #dde1e7;
+    padding: 0 20px;
   }
-
-  #controls label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  .tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-size: 14px;
     cursor: pointer;
-    white-space: nowrap;
-  }
-
-  #controls .version-select { margin-left: auto; }
-
-  #summary {
-    padding: 8px 20px;
-    font-size: 12px;
     color: #666;
-    background: #f5f6f8;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
   }
+  .tab-btn.active { color: #1a4e8c; font-weight: 600; border-bottom-color: #1a4e8c; }
 
-  .table-wrap {
-    overflow-x: auto;
-    padding: 0 20px 20px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    border-radius: 6px;
-    overflow: hidden;
-    min-width: 800px;
-  }
-
-  thead th {
-    background: #eef1f5;
-    text-align: left;
-    padding: 9px 12px;
-    font-weight: 600;
-    font-size: 12px;
-    color: #555;
-    border-bottom: 1px solid #dde1e7;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-  }
-  thead th:hover { background: #e2e6ed; }
-  thead th.sorted-asc::after  { content: " ▲"; }
-  thead th.sorted-desc::after { content: " ▼"; }
-
-  tbody tr:nth-child(even) { background: #fafbfc; }
-  tbody tr:hover { background: #eef4ff; }
-
-  td {
-    padding: 7px 12px;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle;
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .badge-senpatu   { background: #dbeafe; color: #1d4ed8; }
-  .badge-junsenpatu{ background: #e0e7ff; color: #4338ca; }
-  .badge-kouhatsu  { background: #dcfce7; color: #15803d; }
-  .badge-hoshi     { background: #fef9c3; color: #854d0e; }
-  .badge-dougaku   { background: #fce7f3; color: #9d174d; }
-
-  .yakka { text-align: right; font-variant-numeric: tabular-nums; }
-
+  /* 凡例 */
   #legend {
     background: #fff;
     border-bottom: 1px solid #dde1e7;
@@ -134,27 +55,110 @@
     font-size: 12px;
     color: #444;
   }
-  #legend .item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  #legend .item { display: flex; align-items: center; gap: 6px; }
   #legend .desc { color: #666; }
 
-  #empty {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-    display: none;
+  /* コントロール */
+  .controls {
+    background: #fff;
+    border-bottom: 1px solid #dde1e7;
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
+  .controls input[type=text] {
+    border: 1px solid #ccc; border-radius: 4px;
+    padding: 6px 10px; width: 260px; font-size: 14px;
+  }
+  .controls select {
+    border: 1px solid #ccc; border-radius: 4px;
+    padding: 6px 8px; font-size: 14px; background: #fff;
+  }
+  .controls label { display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+  .spacer { flex: 1; }
+
+  #summary {
+    padding: 7px 20px;
+    font-size: 12px;
+    color: #666;
+    background: #f5f6f8;
+  }
+
+  /* テーブル共通 */
+  .table-wrap { overflow-x: auto; padding: 0 20px 20px; }
+  table {
+    width: 100%; border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    border-radius: 6px; overflow: hidden; min-width: 800px;
+  }
+  thead th {
+    background: #eef1f5; text-align: left;
+    padding: 9px 12px; font-weight: 600; font-size: 12px; color: #555;
+    border-bottom: 1px solid #dde1e7;
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { background: #e2e6ed; }
+  thead th.sorted-asc::after  { content: " ▲"; }
+  thead th.sorted-desc::after { content: " ▼"; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  tbody tr:hover { background: #eef4ff; }
+  td { padding: 7px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  .yakka { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* バッジ */
+  .badge {
+    display: inline-block; padding: 2px 7px;
+    border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .badge-senpatu    { background: #dbeafe; color: #1d4ed8; }
+  .badge-junsenpatu { background: #e0e7ff; color: #4338ca; }
+  .badge-kouhatsu   { background: #dcfce7; color: #15803d; }
+  .badge-hoshi      { background: #fef9c3; color: #854d0e; }
+  .badge-dougaku    { background: #fce7f3; color: #9d174d; }
+
+  /* 差分バッジ */
+  .badge-added   { background: #dcfce7; color: #15803d; }
+  .badge-removed { background: #fee2e2; color: #b91c1c; }
+  .badge-up      { background: #fee2e2; color: #b91c1c; }
+  .badge-down    { background: #dbeafe; color: #1d4ed8; }
+  .badge-dougaku-on  { background: #fce7f3; color: #9d174d; }
+  .badge-dougaku-off { background: #f3f4f6; color: #6b7280; }
+
+  .diff-stats {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    padding: 10px 20px; background: #fff;
+    border-bottom: 1px solid #dde1e7; font-size: 13px;
+  }
+  .diff-stats span { color: #555; }
+  .diff-stats b { font-weight: 700; }
+
+  .yakka-change { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .yakka-change .arrow { margin: 0 4px; color: #999; }
+  .yakka-change .delta { font-size: 11px; margin-left: 4px; }
+  .delta-up   { color: #b91c1c; }
+  .delta-down { color: #1d4ed8; }
+
+  #empty, #empty-diff {
+    text-align: center; padding: 40px; color: #999; display: none;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>薬価基準ビューア</h1>
-  <span id="ver-label"></span>
 </header>
+
+<div id="tabs">
+  <button class="tab-btn active" data-tab="list">一覧</button>
+  <button class="tab-btn" data-tab="diff">差分（改定前後比較）</button>
+</div>
 
 <div id="legend">
   <div class="item"><span class="badge badge-senpatu">先発品</span><span class="desc">新薬として最初に承認された医薬品</span></div>
@@ -164,71 +168,96 @@
   <div class="item"><span class="badge badge-dougaku">○同額</span><span class="desc">後発品と同額水準まで薬価が下がった先発品（長期収載品G1等）</span></div>
 </div>
 
-<div id="controls">
-  <input type="text" id="q" placeholder="品名・成分名・メーカー名で検索...">
-
-  <select id="kubun">
-    <option value="">区分：すべて</option>
-    <option value="内用薬">内用薬</option>
-    <option value="外用薬">外用薬</option>
-    <option value="注射薬">注射薬</option>
-    <option value="歯科用薬剤">歯科用薬剤</option>
-  </select>
-
-  <select id="kind">
-    <option value="">種別：すべて</option>
-    <option value="senpatu">先発品</option>
-    <option value="junsenpatu">準先発品</option>
-    <option value="kouhatsu">後発品（加算対象）</option>
-    <option value="hoshi">後発品（★加算対象外）</option>
-  </select>
-
-  <label><input type="checkbox" id="dougaku"> 先発と後発が同額水準（○）のみ</label>
-
-  <select id="version" class="version-select"></select>
+<!-- ===== 一覧パネル ===== -->
+<div id="panel-list" class="panel active">
+  <div class="controls">
+    <input type="text" id="q" placeholder="品名・成分名・メーカー名で検索...">
+    <select id="kubun">
+      <option value="">区分：すべて</option>
+      <option value="内用薬">内用薬</option>
+      <option value="外用薬">外用薬</option>
+      <option value="注射薬">注射薬</option>
+      <option value="歯科用薬剤">歯科用薬剤</option>
+    </select>
+    <select id="kind">
+      <option value="">種別：すべて</option>
+      <option value="senpatu">先発品</option>
+      <option value="junsenpatu">準先発品</option>
+      <option value="kouhatsu">後発品（加算対象）</option>
+      <option value="hoshi">後発品（★加算対象外）</option>
+    </select>
+    <label><input type="checkbox" id="dougaku"> ○同額のみ</label>
+    <div class="spacer"></div>
+    <select id="version"></select>
+  </div>
+  <div id="summary"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-col="kubun">区分</th>
+          <th data-col="seibun">成分名</th>
+          <th data-col="hinmei">品名</th>
+          <th data-col="kikaku">規格</th>
+          <th data-col="maker">メーカー</th>
+          <th>種別</th>
+          <th data-col="yakka">薬価</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty">該当する品目がありません</div>
+  </div>
 </div>
 
-<div id="summary"></div>
-
-<div class="table-wrap">
-  <table id="tbl">
-    <thead>
-      <tr>
-        <th data-col="kubun">区分</th>
-        <th data-col="seibun">成分名</th>
-        <th data-col="hinmei">品名</th>
-        <th data-col="kikaku">規格</th>
-        <th data-col="maker">メーカー</th>
-        <th data-col="kind">種別</th>
-        <th data-col="yakka">薬価</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <div id="empty">該当する品目がありません</div>
+<!-- ===== 差分パネル ===== -->
+<div id="panel-diff" class="panel">
+  <div class="controls">
+    <input type="text" id="dq" placeholder="品名・成分名で検索...">
+    <select id="dkubun">
+      <option value="">区分：すべて</option>
+      <option value="内用薬">内用薬</option>
+      <option value="外用薬">外用薬</option>
+      <option value="注射薬">注射薬</option>
+      <option value="歯科用薬剤">歯科用薬剤</option>
+    </select>
+    <select id="dtype">
+      <option value="">変更種別：すべて</option>
+      <option value="down">薬価値下がり</option>
+      <option value="up">薬価値上がり</option>
+      <option value="dougaku_on">新たに○同額</option>
+      <option value="dougaku_off">○同額から外れた</option>
+      <option value="added">新規収載</option>
+      <option value="removed">削除</option>
+    </select>
+    <div class="spacer"></div>
+    <select id="diff-version"></select>
+  </div>
+  <div id="diff-stats" class="diff-stats"></div>
+  <div id="diff-summary" style="padding:7px 20px;font-size:12px;color:#666;background:#f5f6f8;"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-dcol="kubun">区分</th>
+          <th data-dcol="seibun">成分名</th>
+          <th data-dcol="hinmei">品名</th>
+          <th data-dcol="kikaku">規格</th>
+          <th data-dcol="maker">メーカー</th>
+          <th>種別</th>
+          <th>変更</th>
+          <th data-dcol="yakka">薬価</th>
+        </tr>
+      </thead>
+      <tbody id="diff-tbody"></tbody>
+    </table>
+    <div id="empty-diff">該当する品目がありません</div>
+  </div>
 </div>
 
 <script>
+// ===== 共通 =====
 const PAGE = 200;
-let allRecords = [];
-let filtered = [];
-let sortCol = null;
-let sortDir = 1;
-let page = 0;
-
-// バージョン一覧を自動検出（data/ 以下の yakka_*.json）
-const VERSIONS = [
-  { label: "2026年4月1日", file: "data/yakka_20260401.json" },
-  { label: "2026年3月18日", file: "data/yakka_20260318.json" },
-];
-
-async function loadVersion(file) {
-  const res = await fetch(file);
-  const json = await res.json();
-  allRecords = json.records;
-  document.getElementById("ver-label").textContent = `収載日: ${json.version.replace(/(\d{4})(\d{2})(\d{2})/, "$1/$2/$3")}`;
-  applyFilter();
-}
 
 function kindOf(r) {
   if (r.senpatu === "先発品")   return "senpatu";
@@ -237,116 +266,256 @@ function kindOf(r) {
   if (r.kouhatsu === "★")       return "hoshi";
   return "other";
 }
-
 function kindBadge(r) {
-  const k = kindOf(r);
   const map = {
     senpatu:    ["badge-senpatu",    "先発品"],
     junsenpatu: ["badge-junsenpatu", "準先発品"],
     kouhatsu:   ["badge-kouhatsu",   "後発品"],
     hoshi:      ["badge-hoshi",      "後発品★"],
-    other:      ["",                 ""],
+    other:      ["", ""],
   };
-  const [cls, label] = map[k];
-  if (!label) return "";
-  let html = `<span class="badge ${cls}">${label}</span>`;
+  const [cls, label] = map[kindOf(r)];
+  let html = label ? `<span class="badge ${cls}">${label}</span>` : "";
   if (r.dougaku) html += ` <span class="badge badge-dougaku">○同額</span>`;
   return html;
 }
 
-function applyFilter() {
-  const q      = document.getElementById("q").value.trim().toLowerCase();
-  const kubun  = document.getElementById("kubun").value;
-  const kind   = document.getElementById("kind").value;
+// ===== タブ =====
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ===== 一覧 =====
+let allRecords = [], listFiltered = [], listSortCol = null, listSortDir = 1, listPage = 0;
+
+const VERSIONS = [
+  { label: "2026年4月1日",  file: "data/yakka_20260401.json" },
+  { label: "2026年3月18日", file: "data/yakka_20260318.json" },
+];
+
+async function loadVersion(file) {
+  const res = await fetch(file);
+  const json = await res.json();
+  allRecords = json.records;
+  applyListFilter();
+}
+
+function applyListFilter() {
+  const q       = document.getElementById("q").value.trim().toLowerCase();
+  const kubun   = document.getElementById("kubun").value;
+  const kind    = document.getElementById("kind").value;
   const dougaku = document.getElementById("dougaku").checked;
 
-  filtered = allRecords.filter(r => {
+  listFiltered = allRecords.filter(r => {
     if (kubun && r.kubun !== kubun) return false;
     if (dougaku && !r.dougaku) return false;
     if (kind && kindOf(r) !== kind) return false;
-    if (q) {
-      const hay = (r.hinmei + r.seibun + r.maker).toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
+    if (q && !(r.hinmei + r.seibun + r.maker).toLowerCase().includes(q)) return false;
     return true;
   });
 
-  if (sortCol) {
-    filtered.sort((a, b) => {
-      let av = a[sortCol] ?? "", bv = b[sortCol] ?? "";
-      if (typeof av === "number" && typeof bv === "number") return (av - bv) * sortDir;
-      return String(av).localeCompare(String(bv), "ja") * sortDir;
+  if (listSortCol) {
+    listFiltered.sort((a, b) => {
+      const av = a[listSortCol] ?? "", bv = b[listSortCol] ?? "";
+      if (typeof av === "number") return (av - bv) * listSortDir;
+      return String(av).localeCompare(String(bv), "ja") * listSortDir;
     });
   }
-
-  page = 0;
-  render();
+  listPage = 0;
+  renderList();
 }
 
-function render() {
+function renderList() {
   const tbody = document.getElementById("tbody");
-  const empty = document.getElementById("empty");
-  const summary = document.getElementById("summary");
-
-  const slice = filtered.slice(0, (page + 1) * PAGE);
-  summary.textContent = `${filtered.length.toLocaleString()} 件 / 全 ${allRecords.length.toLocaleString()} 件`;
-
-  tbody.innerHTML = slice.map(r => `
-    <tr>
-      <td>${r.kubun}</td>
-      <td>${r.seibun}</td>
-      <td>${r.hinmei}</td>
-      <td>${r.kikaku}</td>
-      <td>${r.maker}</td>
-      <td>${kindBadge(r)}</td>
-      <td class="yakka">${r.yakka != null ? r.yakka.toFixed(1) + " 円" : ""}</td>
-    </tr>
-  `).join("");
-
-  empty.style.display = filtered.length === 0 ? "block" : "none";
+  const slice = listFiltered.slice(0, (listPage + 1) * PAGE);
+  document.getElementById("summary").textContent =
+    `${listFiltered.length.toLocaleString()} 件 / 全 ${allRecords.length.toLocaleString()} 件`;
+  tbody.innerHTML = slice.map(r => `<tr>
+    <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
+    <td>${r.kikaku}</td><td>${r.maker}</td>
+    <td>${kindBadge(r)}</td>
+    <td class="yakka">${r.yakka != null ? r.yakka.toFixed(1) + " 円" : ""}</td>
+  </tr>`).join("");
+  document.getElementById("empty").style.display = listFiltered.length === 0 ? "block" : "none";
 }
 
-// 無限スクロール
-window.addEventListener("scroll", () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-    if ((page + 1) * PAGE < filtered.length) {
-      page++;
-      render();
-    }
-  }
-});
-
-// ソート
-document.querySelectorAll("thead th").forEach(th => {
+// ソート（一覧）
+document.querySelectorAll("thead th[data-col]").forEach(th => {
   th.addEventListener("click", () => {
     const col = th.dataset.col;
-    if (col === "kind") return;
-    if (sortCol === col) { sortDir *= -1; }
-    else { sortCol = col; sortDir = 1; }
+    if (listSortCol === col) listSortDir *= -1;
+    else { listSortCol = col; listSortDir = 1; }
     document.querySelectorAll("thead th").forEach(t => t.classList.remove("sorted-asc","sorted-desc"));
-    th.classList.add(sortDir === 1 ? "sorted-asc" : "sorted-desc");
-    applyFilter();
+    th.classList.add(listSortDir === 1 ? "sorted-asc" : "sorted-desc");
+    applyListFilter();
   });
 });
 
-// フィルタ
 ["q","kubun","kind","dougaku"].forEach(id => {
-  document.getElementById(id).addEventListener("input", applyFilter);
-  document.getElementById(id).addEventListener("change", applyFilter);
+  const el = document.getElementById(id);
+  el.addEventListener("input", applyListFilter);
+  el.addEventListener("change", applyListFilter);
 });
 
-// バージョン選択
-const sel = document.getElementById("version");
-VERSIONS.forEach((v, i) => {
+const verSel = document.getElementById("version");
+VERSIONS.forEach(v => {
   const opt = document.createElement("option");
-  opt.value = v.file;
-  opt.textContent = v.label;
-  sel.appendChild(opt);
+  opt.value = v.file; opt.textContent = v.label;
+  verSel.appendChild(opt);
 });
-sel.addEventListener("change", () => loadVersion(sel.value));
-
-// 初期ロード
+verSel.addEventListener("change", () => loadVersion(verSel.value));
 loadVersion(VERSIONS[0].file);
+
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+    if ((listPage + 1) * PAGE < listFiltered.length) { listPage++; renderList(); }
+    if ((diffPage + 1) * PAGE < diffFiltered.length) { diffPage++; renderDiff(); }
+  }
+});
+
+// ===== 差分 =====
+const DIFFS = [
+  { label: "2026年3月18日 → 4月1日", file: "data/diff_20260318_20260401.json" },
+];
+
+let diffData = null, diffRows = [], diffFiltered = [], diffSortCol = null, diffSortDir = 1, diffPage = 0;
+
+function diffTypeOf(r) {
+  if (r._type === "added")   return "added";
+  if (r._type === "removed") return "removed";
+  const c = r.changes;
+  if (c.dougaku?.new === true)  return "dougaku_on";
+  if (c.dougaku?.new === false) return "dougaku_off";
+  if (c.yakka) return c.yakka.new > c.yakka.old ? "up" : "down";
+  return "other";
+}
+
+function diffTypeBadge(type) {
+  const map = {
+    added:       ["badge-added",      "新規収載"],
+    removed:     ["badge-removed",    "削除"],
+    up:          ["badge-up",         "値上がり"],
+    down:        ["badge-down",       "値下がり"],
+    dougaku_on:  ["badge-dougaku-on", "新たに○同額"],
+    dougaku_off: ["badge-dougaku-off","○同額から外れた"],
+    other:       ["",                 "その他変更"],
+  };
+  const [cls, label] = map[type] || ["", type];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function yakkaChangeCell(r) {
+  if (r._type === "added")   return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
+  if (r._type === "removed") return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
+  const c = r.changes?.yakka;
+  if (!c) return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
+  const delta = c.new - c.old;
+  const sign  = delta > 0 ? "+" : "";
+  const cls   = delta > 0 ? "delta-up" : "delta-down";
+  return `<span class="yakka-change">
+    ${c.old.toFixed(1)}<span class="arrow">→</span>${c.new.toFixed(1)} 円
+    <span class="delta ${cls}">(${sign}${delta.toFixed(1)})</span>
+  </span>`;
+}
+
+async function loadDiff(file) {
+  const res = await fetch(file);
+  diffData = await res.json();
+
+  // 全行をフラットに展開
+  diffRows = [
+    ...diffData.added.map(r   => ({ ...r, _type: "added" })),
+    ...diffData.removed.map(r => ({ ...r, _type: "removed" })),
+    ...diffData.changed.map(r => ({ ...r, _type: "changed" })),
+  ];
+
+  // 統計
+  const stats = { added: diffData.added.length, removed: diffData.removed.length };
+  stats.down = diffData.changed.filter(r => r.changes.yakka && r.changes.yakka.new < r.changes.yakka.old).length;
+  stats.up   = diffData.changed.filter(r => r.changes.yakka && r.changes.yakka.new > r.changes.yakka.old).length;
+  stats.dougaku_on  = diffData.changed.filter(r => r.changes.dougaku?.new === true).length;
+  stats.dougaku_off = diffData.changed.filter(r => r.changes.dougaku?.new === false).length;
+  document.getElementById("diff-stats").innerHTML = `
+    <span>新規収載 <b>${stats.added}</b> 件</span>
+    <span>削除 <b>${stats.removed}</b> 件</span>
+    <span>値下がり <b>${stats.down}</b> 件</span>
+    <span>値上がり <b>${stats.up}</b> 件</span>
+    <span>新たに○同額 <b>${stats.dougaku_on}</b> 件</span>
+    <span>○同額から外れた <b>${stats.dougaku_off}</b> 件</span>
+  `;
+
+  applyDiffFilter();
+}
+
+function applyDiffFilter() {
+  const q     = document.getElementById("dq").value.trim().toLowerCase();
+  const kubun = document.getElementById("dkubun").value;
+  const type  = document.getElementById("dtype").value;
+
+  diffFiltered = diffRows.filter(r => {
+    if (kubun && r.kubun !== kubun) return false;
+    if (type  && diffTypeOf(r) !== type) return false;
+    if (q && !(r.hinmei + r.seibun).toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (diffSortCol) {
+    diffFiltered.sort((a, b) => {
+      const av = a[diffSortCol] ?? "", bv = b[diffSortCol] ?? "";
+      if (typeof av === "number") return (av - bv) * diffSortDir;
+      return String(av).localeCompare(String(bv), "ja") * diffSortDir;
+    });
+  }
+  diffPage = 0;
+  renderDiff();
+}
+
+function renderDiff() {
+  const tbody = document.getElementById("diff-tbody");
+  const slice = diffFiltered.slice(0, (diffPage + 1) * PAGE);
+  document.getElementById("diff-summary").textContent =
+    `${diffFiltered.length.toLocaleString()} 件表示`;
+  tbody.innerHTML = slice.map(r => `<tr>
+    <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
+    <td>${r.kikaku}</td><td>${r.maker}</td>
+    <td>${kindBadge(r)}</td>
+    <td>${diffTypeBadge(diffTypeOf(r))}</td>
+    <td class="yakka">${yakkaChangeCell(r)}</td>
+  </tr>`).join("");
+  document.getElementById("empty-diff").style.display = diffFiltered.length === 0 ? "block" : "none";
+}
+
+// ソート（差分）
+document.querySelectorAll("thead th[data-dcol]").forEach(th => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.dcol;
+    if (diffSortCol === col) diffSortDir *= -1;
+    else { diffSortCol = col; diffSortDir = 1; }
+    document.querySelectorAll("#panel-diff thead th").forEach(t => t.classList.remove("sorted-asc","sorted-desc"));
+    th.classList.add(diffSortDir === 1 ? "sorted-asc" : "sorted-desc");
+    applyDiffFilter();
+  });
+});
+
+["dq","dkubun","dtype"].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", applyDiffFilter);
+  el.addEventListener("change", applyDiffFilter);
+});
+
+const diffVerSel = document.getElementById("diff-version");
+DIFFS.forEach(d => {
+  const opt = document.createElement("option");
+  opt.value = d.file; opt.textContent = d.label;
+  diffVerSel.appendChild(opt);
+});
+diffVerSel.addEventListener("change", () => loadDiff(diffVerSel.value));
+loadDiff(DIFFS[0].file);
 </script>
 </body>
 </html>
