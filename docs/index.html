@@ -118,6 +118,42 @@
   .empty { text-align: center; padding: 40px; color: #aaa; display: none; }
   .panel { display: none; }
   .panel.active { display: block; }
+
+  /* ===== モバイル ===== */
+  @media (max-width: 640px) {
+    header { padding: 10px 14px; }
+    header h1 { font-size: 16px; }
+
+    #tabs { padding: 0 4px; overflow-x: auto; }
+    .tab-btn { padding: 10px 14px; font-size: 13px; }
+
+    .controls {
+      padding: 8px 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .controls input[type=text],
+    .controls select { width: 100%; font-size: 16px; /* iOSズーム防止 */ }
+    .spacer { display: none; }
+
+    .stats-bar {
+      padding: 8px 12px;
+      gap: 8px;
+      justify-content: space-around;
+    }
+    .stats-bar .stat-num { font-size: 28px; }
+    .stats-bar .stat-label { font-size: 10px; text-align: center; }
+    .clickable-stat { padding: 6px 4px; }
+
+    .sub-bar { padding: 5px 12px; }
+    .table-wrap { padding: 0 0 40px; }
+    table { border-radius: 0; margin-top: 0; }
+    td, thead th { padding: 8px 8px; font-size: 12px; }
+
+    /* モバイルで非表示にする列 */
+    .hide-sp { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -160,14 +196,14 @@
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th data-ccol="kubun">区分</th>
+        <th data-ccol="kubun" class="hide-sp">区分</th>
         <th data-ccol="seibun">成分名</th>
-        <th data-ccol="kikaku">規格</th>
+        <th data-ccol="kikaku" class="hide-sp">規格</th>
         <th data-ccol="senpatu_hinmei">先発品名</th>
-        <th data-ccol="senpatu_maker">メーカー</th>
+        <th data-ccol="senpatu_maker" class="hide-sp">メーカー</th>
         <th data-ccol="senpatu_yakka">先発薬価</th>
         <th data-ccol="kouhatsu_min">最安後発</th>
-        <th>後発品名（安い順）</th>
+        <th class="hide-sp">後発品名（安い順）</th>
         <th data-ccol="diff">差額</th>
       </tr></thead>
       <tbody id="compare-tbody"></tbody>
@@ -202,12 +238,12 @@
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th data-dcol="kubun">区分</th>
-        <th data-dcol="seibun">成分名</th>
+        <th data-dcol="kubun" class="hide-sp">区分</th>
+        <th data-dcol="seibun" class="hide-sp">成分名</th>
         <th data-dcol="hinmei">品名</th>
-        <th data-dcol="kikaku">規格</th>
-        <th data-dcol="maker">メーカー</th>
-        <th>種別</th>
+        <th data-dcol="kikaku" class="hide-sp">規格</th>
+        <th data-dcol="maker" class="hide-sp">メーカー</th>
+        <th class="hide-sp">種別</th>
         <th>変更</th>
         <th data-dcol="yakka_old">改定前</th>
         <th data-dcol="yakka">改定後</th>
@@ -244,11 +280,11 @@
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th data-col="kubun">区分</th>
+        <th data-col="kubun" class="hide-sp">区分</th>
         <th data-col="seibun">成分名</th>
         <th data-col="hinmei">品名</th>
-        <th data-col="kikaku">規格</th>
-        <th data-col="maker">メーカー</th>
+        <th data-col="kikaku" class="hide-sp">規格</th>
+        <th data-col="maker" class="hide-sp">メーカー</th>
         <th>種別</th>
         <th data-col="yakka">薬価</th>
       </tr></thead>
@@ -419,12 +455,12 @@ function renderCompare() {
     const typeLabel = r.senpatu_type === "準先発品"
       ? `<span class="badge b-jun">準先発品</span>` : `<span class="badge b-sen">先発品</span>`;
     return `<tr>
-      <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.kikaku}</td>
+      <td class="hide-sp">${r.kubun}</td><td>${r.seibun}</td><td class="hide-sp">${r.kikaku}</td>
       <td>${r.senpatu_hinmei} ${typeLabel}</td>
-      <td>${r.senpatu_maker}</td>
+      <td class="hide-sp">${r.senpatu_maker}</td>
       <td class="num">${senCell}</td>
       <td class="num">${genCell}</td>
-      <td>${genNames(r.kouhatsu_list)}</td>
+      <td class="hide-sp">${genNames(r.kouhatsu_list)}</td>
       <td class="num">${diffCell}</td>
     </tr>`;
   }).join("");
@@ -519,9 +555,9 @@ function renderDiff() {
       deltaCell = `<span class="${r.delta > 0 ? "up" : "down"}">${sign}${r.delta.toFixed(1)}</span>`;
     }
     return `<tr>
-      <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
-      <td>${r.kikaku}</td><td>${r.maker}</td>
-      <td>${kindBadge(r)}</td>
+      <td class="hide-sp">${r.kubun}</td><td class="hide-sp">${r.seibun}</td><td>${r.hinmei}</td>
+      <td class="hide-sp">${r.kikaku}</td><td class="hide-sp">${r.maker}</td>
+      <td class="hide-sp">${kindBadge(r)}</td>
       <td><span class="badge ${cls}">${label}</span></td>
       <td class="num">${oldCell}</td>
       <td class="num">${newCell}</td>
@@ -583,8 +619,8 @@ function renderList() {
   document.getElementById("list-sub").textContent =
     `${listFiltered.length.toLocaleString()} 件 / 全 ${allRecords.length.toLocaleString()} 件`;
   document.getElementById("list-tbody").innerHTML = slice.map(r => `<tr>
-    <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
-    <td>${r.kikaku}</td><td>${r.maker}</td>
+    <td class="hide-sp">${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
+    <td class="hide-sp">${r.kikaku}</td><td class="hide-sp">${r.maker}</td>
     <td>${kindBadge(r)}</td>
     <td class="num">${r.yakka != null ? r.yakka.toFixed(1) + " 円" : ""}</td>
   </tr>`).join("");
