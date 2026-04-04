@@ -246,7 +246,9 @@
           <th data-dcol="maker">メーカー</th>
           <th>種別</th>
           <th>変更</th>
-          <th data-dcol="yakka">薬価</th>
+          <th data-dcol="yakka_old">改定前</th>
+          <th data-dcol="yakka">改定後</th>
+          <th data-dcol="delta">差額</th>
         </tr>
       </thead>
       <tbody id="diff-tbody"></tbody>
@@ -409,29 +411,23 @@ function diffTypeBadge(type) {
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
-function yakkaChangeCell(r) {
-  if (r._type === "added")   return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
-  if (r._type === "removed") return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
-  const c = r.changes?.yakka;
-  if (!c) return r.yakka != null ? r.yakka.toFixed(1) + " 円" : "";
-  const delta = c.new - c.old;
-  const sign  = delta > 0 ? "+" : "";
-  const cls   = delta > 0 ? "delta-up" : "delta-down";
-  return `<span class="yakka-change">
-    ${c.old.toFixed(1)}<span class="arrow">→</span>${c.new.toFixed(1)} 円
-    <span class="delta ${cls}">(${sign}${delta.toFixed(1)})</span>
-  </span>`;
-}
 
 async function loadDiff(file) {
   const res = await fetch(file);
   diffData = await res.json();
 
-  // 全行をフラットに展開
+  // 全行をフラットに展開（ソート用に yakka_old / delta を付与）
+  const enrich = (r, type) => {
+    const yakka_old = r.changes?.yakka?.old ?? r.yakka ?? null;
+    const yakka_new = r.changes?.yakka?.new ?? r.yakka ?? null;
+    const delta = (yakka_old != null && yakka_new != null && r.changes?.yakka)
+      ? yakka_new - yakka_old : null;
+    return { ...r, _type: type, yakka_old, delta };
+  };
   diffRows = [
-    ...diffData.added.map(r   => ({ ...r, _type: "added" })),
-    ...diffData.removed.map(r => ({ ...r, _type: "removed" })),
-    ...diffData.changed.map(r => ({ ...r, _type: "changed" })),
+    ...diffData.added.map(r   => enrich(r, "added")),
+    ...diffData.removed.map(r => enrich(r, "removed")),
+    ...diffData.changed.map(r => enrich(r, "changed")),
   ];
 
   // 統計
@@ -480,13 +476,26 @@ function renderDiff() {
   const slice = diffFiltered.slice(0, (diffPage + 1) * PAGE);
   document.getElementById("diff-summary").textContent =
     `${diffFiltered.length.toLocaleString()} 件表示`;
-  tbody.innerHTML = slice.map(r => `<tr>
-    <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
-    <td>${r.kikaku}</td><td>${r.maker}</td>
-    <td>${kindBadge(r)}</td>
-    <td>${diffTypeBadge(diffTypeOf(r))}</td>
-    <td class="yakka">${yakkaChangeCell(r)}</td>
-  </tr>`).join("");
+  tbody.innerHTML = slice.map(r => {
+    const hasYakkaChange = r.changes?.yakka != null;
+    const oldCell = r.yakka_old != null ? r.yakka_old.toFixed(1) + " 円" : "—";
+    const newCell = r.yakka    != null ? r.yakka.toFixed(1)     + " 円" : "—";
+    let deltaCell = "—";
+    if (r.delta != null) {
+      const sign = r.delta > 0 ? "+" : "";
+      const cls  = r.delta > 0 ? "delta-up" : "delta-down";
+      deltaCell = `<span class="delta ${cls}">${sign}${r.delta.toFixed(1)}</span>`;
+    }
+    return `<tr>
+      <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
+      <td>${r.kikaku}</td><td>${r.maker}</td>
+      <td>${kindBadge(r)}</td>
+      <td>${diffTypeBadge(diffTypeOf(r))}</td>
+      <td class="yakka">${r._type === "added" ? "—" : oldCell}</td>
+      <td class="yakka">${r._type === "removed" ? "—" : newCell}</td>
+      <td class="yakka">${deltaCell}</td>
+    </tr>`;
+  }).join("");
   document.getElementById("empty-diff").style.display = diffFiltered.length === 0 ? "block" : "none";
 }
 
