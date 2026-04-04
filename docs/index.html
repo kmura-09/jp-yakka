@@ -134,24 +134,47 @@
       gap: 8px;
     }
     .controls input[type=text],
-    .controls select { width: 100%; font-size: 16px; /* iOSズーム防止 */ }
+    .controls select { width: 100%; font-size: 16px; }
     .spacer { display: none; }
 
     .stats-bar {
-      padding: 8px 12px;
-      gap: 8px;
+      padding: 8px 12px; gap: 6px;
       justify-content: space-around;
     }
-    .stats-bar .stat-num { font-size: 28px; }
+    .stats-bar .stat-num { font-size: 26px; }
     .stats-bar .stat-label { font-size: 10px; text-align: center; }
     .clickable-stat { padding: 6px 4px; }
 
     .sub-bar { padding: 5px 12px; }
-    .table-wrap { padding: 0 0 40px; }
-    table { border-radius: 0; margin-top: 0; }
-    td, thead th { padding: 8px 8px; font-size: 12px; }
 
-    /* モバイルで非表示にする列 */
+    /* テーブル → カード形式 */
+    .table-wrap { padding: 8px 12px 40px; }
+    table, thead, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    table { box-shadow: none; background: transparent; min-width: unset; margin-top: 0; }
+
+    tbody tr {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2px 8px;
+      border: none;
+    }
+    tbody td {
+      padding: 2px 0;
+      border: none;
+      font-size: 13px;
+    }
+    /* カード内の役割をdata属性で制御 */
+    td.card-main  { font-weight: 600; font-size: 14px; grid-column: 1; }
+    td.card-sub   { color: #666; font-size: 12px; grid-column: 1; }
+    td.card-price { text-align: right; font-weight: 700; font-size: 15px; grid-column: 2; grid-row: 1 / 3; align-self: center; }
+    td.card-badge { grid-column: 1; }
+    td.card-diff  { grid-column: 2; text-align: right; font-size: 13px; align-self: end; }
     .hide-sp { display: none; }
   }
 </style>
@@ -455,13 +478,15 @@ function renderCompare() {
     const typeLabel = r.senpatu_type === "準先発品"
       ? `<span class="badge b-jun">準先発品</span>` : `<span class="badge b-sen">先発品</span>`;
     return `<tr>
-      <td class="hide-sp">${r.kubun}</td><td>${r.seibun}</td><td class="hide-sp">${r.kikaku}</td>
-      <td>${r.senpatu_hinmei} ${typeLabel}</td>
+      <td class="hide-sp">${r.kubun}</td>
+      <td class="card-main">${r.seibun} <span style="font-weight:400;color:#888;font-size:12px">${r.kikaku}</span></td>
+      <td class="hide-sp">${r.kikaku}</td>
+      <td class="card-sub">${r.senpatu_hinmei} ${typeLabel}</td>
       <td class="hide-sp">${r.senpatu_maker}</td>
-      <td class="num">${senCell}</td>
-      <td class="num">${genCell}</td>
+      <td class="num card-price">${senCell}</td>
+      <td class="num">最安後発 ${genCell}</td>
       <td class="hide-sp">${genNames(r.kouhatsu_list)}</td>
-      <td class="num">${diffCell}</td>
+      <td class="num card-diff">${diffCell}</td>
     </tr>`;
   }).join("");
   document.getElementById("empty-compare").style.display = cmpFiltered.length === 0 ? "block" : "none";
@@ -555,13 +580,16 @@ function renderDiff() {
       deltaCell = `<span class="${r.delta > 0 ? "up" : "down"}">${sign}${r.delta.toFixed(1)}</span>`;
     }
     return `<tr>
-      <td class="hide-sp">${r.kubun}</td><td class="hide-sp">${r.seibun}</td><td>${r.hinmei}</td>
-      <td class="hide-sp">${r.kikaku}</td><td class="hide-sp">${r.maker}</td>
+      <td class="hide-sp">${r.kubun}</td>
+      <td class="hide-sp">${r.seibun}</td>
+      <td class="card-main">${r.hinmei}</td>
+      <td class="hide-sp">${r.kikaku}</td>
+      <td class="hide-sp">${r.maker}</td>
       <td class="hide-sp">${kindBadge(r)}</td>
-      <td><span class="badge ${cls}">${label}</span></td>
-      <td class="num">${oldCell}</td>
-      <td class="num">${newCell}</td>
-      <td class="num">${deltaCell}</td>
+      <td class="card-badge"><span class="badge ${cls}">${label}</span></td>
+      <td class="num card-price">${newCell}</td>
+      <td class="num card-sub">前回 ${oldCell}</td>
+      <td class="num card-diff">${deltaCell}</td>
     </tr>`;
   }).join("");
   document.getElementById("empty-diff").style.display = diffFiltered.length === 0 ? "block" : "none";
@@ -619,10 +647,13 @@ function renderList() {
   document.getElementById("list-sub").textContent =
     `${listFiltered.length.toLocaleString()} 件 / 全 ${allRecords.length.toLocaleString()} 件`;
   document.getElementById("list-tbody").innerHTML = slice.map(r => `<tr>
-    <td class="hide-sp">${r.kubun}</td><td>${r.seibun}</td><td>${r.hinmei}</td>
-    <td class="hide-sp">${r.kikaku}</td><td class="hide-sp">${r.maker}</td>
-    <td>${kindBadge(r)}</td>
-    <td class="num">${r.yakka != null ? r.yakka.toFixed(1) + " 円" : ""}</td>
+    <td class="hide-sp">${r.kubun}</td>
+    <td class="card-main">${r.hinmei}</td>
+    <td class="card-sub">${r.seibun} <span style="color:#aaa">${r.kikaku}</span></td>
+    <td class="hide-sp">${r.kikaku}</td>
+    <td class="hide-sp">${r.maker}</td>
+    <td class="card-badge">${kindBadge(r)}</td>
+    <td class="num card-price">${r.yakka != null ? r.yakka.toFixed(1) + " 円" : ""}</td>
   </tr>`).join("");
   document.getElementById("empty-list").style.display = listFiltered.length === 0 ? "block" : "none";
 }
