@@ -64,6 +64,8 @@
   .stats-bar .stat { display: flex; flex-direction: column; align-items: center; }
   .stats-bar .stat-num { font-size: 22px; font-weight: 700; color: #1a4e8c; }
   .stats-bar .stat-label { font-size: 11px; color: #666; }
+  .clickable-stat { cursor: pointer; border-radius: 6px; padding: 4px 8px; transition: background .15s; }
+  .clickable-stat:hover { background: #e2e8f0; }
 
   .sub-bar {
     padding: 6px 20px;
@@ -344,11 +346,17 @@ async function loadCompare(entry) {
   const rev     = compareRows.filter(r => r.diff < 0).length;
   const flipped = flippedRows.length;
   document.getElementById("compare-stats").innerHTML = `
-    <div class="stat"><span class="stat-num">${loss}</span><span class="stat-label">後発に切替で節約できる成分</span></div>
-    <div class="stat"><span class="stat-num">${same}</span><span class="stat-label">先発＝最安後発（同額）</span></div>
-    <div class="stat"><span class="stat-num">${rev}</span><span class="stat-label">後発の方が高い</span></div>
-    ${flipped ? `<div class="stat"><span class="stat-num" style="color:#b91c1c">${flipped}</span><span class="stat-label">今回から後発≧先発になった</span></div>` : ""}
+    <div class="stat clickable-stat" data-filter="loss"><span class="stat-num">${loss}</span><span class="stat-label">後発に切替で節約できる</span></div>
+    <div class="stat clickable-stat" data-filter="same"><span class="stat-num">${same}</span><span class="stat-label">先発＝後発（同額）</span></div>
+    <div class="stat clickable-stat" data-filter="rev"><span class="stat-num">${rev}</span><span class="stat-label">後発の方が高い</span></div>
+    ${flipped ? `<div class="stat clickable-stat" data-filter="flipped" style="border-left:3px solid #b91c1c;padding-left:12px"><span class="stat-num" style="color:#b91c1c">${flipped}</span><span class="stat-label" style="color:#b91c1c;font-weight:600">今回から後発≧先発になった ▶</span></div>` : ""}
   `;
+  document.querySelectorAll(".clickable-stat").forEach(el => {
+    el.addEventListener("click", () => {
+      document.getElementById("ctype").value = el.dataset.filter;
+      applyCompareFilter();
+    });
+  });
   applyCompareFilter();
 }
 
