@@ -147,6 +147,7 @@
       <option value="">すべて表示</option>
       <option value="same">先発＝後発（同額）</option>
       <option value="rev">後発の方が高い</option>
+      <option value="flipped">今回の改定で後発≧先発になった</option>
     </select>
     <div class="spacer"></div>
     <select id="compare-version"></select>
@@ -322,22 +323,31 @@ function genNames(list) {
 
 // ===== 先発・後発比較 =====
 const COMPARES = [
-  { label: "2026年4月1日",  file: "data/compare_20260401.json" },
-  { label: "2026年3月18日", file: "data/compare_20260318.json" },
+  { label: "2026年4月1日",  file: "data/compare_20260401.json",
+    deltaFile: "data/compare_delta_20260318_20260401.json" },
+  { label: "2026年3月18日", file: "data/compare_20260318.json", deltaFile: null },
 ];
-let compareRows = [], cmpFiltered = [];
+let compareRows = [], flippedRows = [], cmpFiltered = [];
 const cmpState = { col: "diff", dir: -1, page: 0, attr: "ccol" };
 
-async function loadCompare(file) {
-  const json = await fetch(file).then(r => r.json());
+async function loadCompare(entry) {
+  const json = await fetch(entry.file).then(r => r.json());
   compareRows = json.rows;
-  const loss = compareRows.filter(r => r.diff > 0).length;
-  const same = compareRows.filter(r => r.dougaku).length;
-  const rev  = compareRows.filter(r => r.diff < 0).length;
+  if (entry.deltaFile) {
+    const delta = await fetch(entry.deltaFile).then(r => r.json());
+    flippedRows = delta.rows;
+  } else {
+    flippedRows = [];
+  }
+  const loss    = compareRows.filter(r => r.diff > 0).length;
+  const same    = compareRows.filter(r => r.dougaku).length;
+  const rev     = compareRows.filter(r => r.diff < 0).length;
+  const flipped = flippedRows.length;
   document.getElementById("compare-stats").innerHTML = `
     <div class="stat"><span class="stat-num">${loss}</span><span class="stat-label">後発に切替で節約できる成分</span></div>
     <div class="stat"><span class="stat-num">${same}</span><span class="stat-label">先発＝最安後発（同額）</span></div>
     <div class="stat"><span class="stat-num">${rev}</span><span class="stat-label">後発の方が高い</span></div>
+    ${flipped ? `<div class="stat"><span class="stat-num" style="color:#b91c1c">${flipped}</span><span class="stat-label">今回から後発≧先発になった</span></div>` : ""}
   `;
   applyCompareFilter();
 }
@@ -346,12 +356,16 @@ function applyCompareFilter() {
   const q     = document.getElementById("cq").value.trim().toLowerCase();
   const kubun = document.getElementById("ckubun").value;
   const ctype = document.getElementById("ctype").value;
-  let rows = compareRows.filter(r => {
+
+  // flippedモードは別データソースを使う
+  const source = ctype === "flipped" ? flippedRows : compareRows;
+
+  let rows = source.filter(r => {
     if (kubun && r.kubun !== kubun) return false;
     if (ctype === "loss" && r.diff <= 0) return false;
     if (ctype === "same" && !r.dougaku) return false;
     if (ctype === "rev"  && r.diff >= 0) return false;
-    if (q && !(r.seibun + r.senpatu_hinmei).toLowerCase().includes(q)) return false;
+    if (q && !(r.seibun + (r.senpatu_hinmei||"")).toLowerCase().includes(q)) return false;
     return true;
   });
   cmpFiltered = cmpState.col ? sortRows(rows, cmpState.col, cmpState.dir) : rows;
@@ -360,16 +374,31 @@ function applyCompareFilter() {
 }
 
 function renderCompare() {
+  const ctype = document.getElementById("ctype").value;
+  const isFlipped = ctype === "flipped";
   const slice = cmpFiltered.slice(0, (cmpState.page + 1) * PAGE);
-  document.getElementById("compare-sub").textContent = `${cmpFiltered.length.toLocaleString()} 件表示（差額の大きい順）`;
+  document.getElementById("compare-sub").textContent = `${cmpFiltered.length.toLocaleString()} 件表示`;
   document.getElementById("compare-tbody").innerHTML = slice.map(r => {
+    const senOld = isFlipped ? r.old_senpatu : null;
+    const senNew = isFlipped ? r.new_senpatu : r.senpatu_yakka;
+    const genOld = isFlipped ? r.old_kouhatsu_min : null;
+    const genNew = isFlipped ? r.new_kouhatsu_min : r.kouhatsu_min;
+    const diff   = isFlipped ? r.new_diff : r.diff;
+
+    const senCell = isFlipped
+      ? `<span class="down">${senOld?.toFixed(1)}</span> → <b>${senNew?.toFixed(1)} 円</b>`
+      : `${senNew?.toFixed(1)} 円`;
+    const genCell = isFlipped
+      ? `<span class="down">${genOld?.toFixed(1)}</span> → <b>${genNew?.toFixed(1)} 円</b>`
+      : `${genNew?.toFixed(1)} 円`;
+
     let diffCell;
-    if (r.dougaku) {
+    if (diff === 0 || r.dougaku) {
       diffCell = `<span class="same-label">同額</span>`;
-    } else if (r.diff > 0) {
-      diffCell = `<span class="up">+${r.diff.toFixed(1)} 円</span>`;
+    } else if (diff > 0) {
+      diffCell = `<span class="up">+${diff.toFixed(1)} 円</span>`;
     } else {
-      diffCell = `<span class="down">${r.diff.toFixed(1)} 円</span>`;
+      diffCell = `<span class="down">${diff.toFixed(1)} 円</span>`;
     }
     const typeLabel = r.senpatu_type === "準先発品"
       ? `<span class="badge b-jun">準先発品</span>` : `<span class="badge b-sen">先発品</span>`;
@@ -377,8 +406,8 @@ function renderCompare() {
       <td>${r.kubun}</td><td>${r.seibun}</td><td>${r.kikaku}</td>
       <td>${r.senpatu_hinmei} ${typeLabel}</td>
       <td>${r.senpatu_maker}</td>
-      <td class="num">${r.senpatu_yakka.toFixed(1)} 円</td>
-      <td class="num">${r.kouhatsu_min.toFixed(1)} 円</td>
+      <td class="num">${senCell}</td>
+      <td class="num">${genCell}</td>
       <td>${genNames(r.kouhatsu_list)}</td>
       <td class="num">${diffCell}</td>
     </tr>`;
@@ -400,9 +429,9 @@ document.querySelectorAll("#panel-compare thead th[data-ccol]").forEach(th =>
   })
 );
 const cmpVerSel = document.getElementById("compare-version");
-COMPARES.forEach(c => { const o = document.createElement("option"); o.value=c.file; o.textContent=c.label; cmpVerSel.appendChild(o); });
-cmpVerSel.addEventListener("change", () => loadCompare(cmpVerSel.value));
-loadCompare(COMPARES[0].file);
+COMPARES.forEach((c, i) => { const o = document.createElement("option"); o.value=i; o.textContent=c.label; cmpVerSel.appendChild(o); });
+cmpVerSel.addEventListener("change", () => loadCompare(COMPARES[+cmpVerSel.value]));
+loadCompare(COMPARES[0]);
 
 // ===== 改定前後の変化 =====
 const DIFFS = [
