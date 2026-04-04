@@ -162,8 +162,8 @@
         <th data-ccol="senpatu_hinmei">先発品名</th>
         <th data-ccol="senpatu_maker">メーカー</th>
         <th data-ccol="senpatu_yakka">先発薬価</th>
-        <th data-ccol="kouhatsu_count">後発品数</th>
         <th data-ccol="kouhatsu_min">最安後発</th>
+        <th>後発品名（安い順）</th>
         <th data-ccol="diff">差額</th>
       </tr></thead>
       <tbody id="compare-tbody"></tbody>
@@ -309,6 +309,17 @@ window.addEventListener("scroll", () => {
   if ((listState.page + 1) * PAGE < listFiltered.length) { listState.page++; renderList(); }
 });
 
+function genNames(list) {
+  if (!list || list.length === 0) return "—";
+  const SHOW = 3;
+  const items = list.slice(0, SHOW).map(g =>
+    `<div style="font-size:12px;white-space:nowrap">${g.hinmei} <span style="color:#888">${g.yakka.toFixed(1)}円</span></div>`
+  ).join("");
+  const rest = list.length > SHOW
+    ? `<div style="font-size:11px;color:#888">他 ${list.length - SHOW} 品</div>` : "";
+  return items + rest;
+}
+
 // ===== 先発・後発比較 =====
 const COMPARES = [
   { label: "2026年4月1日",  file: "data/compare_20260401.json" },
@@ -367,8 +378,8 @@ function renderCompare() {
       <td>${r.senpatu_hinmei} ${typeLabel}</td>
       <td>${r.senpatu_maker}</td>
       <td class="num">${r.senpatu_yakka.toFixed(1)} 円</td>
-      <td class="num">${r.kouhatsu_count}</td>
       <td class="num">${r.kouhatsu_min.toFixed(1)} 円</td>
+      <td>${genNames(r.kouhatsu_list)}</td>
       <td class="num">${diffCell}</td>
     </tr>`;
   }).join("");

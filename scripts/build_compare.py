@@ -55,6 +55,11 @@ def build(records):
                 "kouhatsu_max":   round(max_kouhatsu, 1),
                 "diff":           round(diff, 1),   # 先発 - 最安後発（正=先発が高い）
                 "dougaku":        round(diff, 1) == 0.0,  # 先発と最安後発が同額
+                "kouhatsu_list":  sorted(
+                    [{"hinmei": r["hinmei"], "maker": r["maker"], "yakka": r["yakka"]}
+                     for r in g["kouhatsu"] if r["yakka"] is not None],
+                    key=lambda x: x["yakka"]
+                ),
             })
 
     # 差額降順（先発が高いほど上）
