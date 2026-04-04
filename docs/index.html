@@ -150,6 +150,7 @@
       <option value="same">先発＝後発（同額）</option>
       <option value="rev">後発の方が高い</option>
       <option value="flipped">今回の改定で後発≧先発になった</option>
+      <option value="restored">今回の改定で後発が先発より安くなった（逆転戻り）</option>
     </select>
     <div class="spacer"></div>
     <select id="compare-version"></select>
@@ -329,27 +330,32 @@ const COMPARES = [
     deltaFile: "data/compare_delta_20260318_20260401.json" },
   { label: "2026年3月18日", file: "data/compare_20260318.json", deltaFile: null },
 ];
-let compareRows = [], flippedRows = [], cmpFiltered = [];
+let compareRows = [], flippedRows = [], restoredRowsG = [], cmpFiltered = [];
 const cmpState = { col: "diff", dir: -1, page: 0, attr: "ccol" };
 
 async function loadCompare(entry) {
   const json = await fetch(entry.file).then(r => r.json());
   compareRows = json.rows;
+  let flippedRows2 = [], restoredRows = [];
   if (entry.deltaFile) {
     const delta = await fetch(entry.deltaFile).then(r => r.json());
-    flippedRows = delta.rows;
-  } else {
-    flippedRows = [];
+    flippedRows2 = delta.flipped  || [];
+    restoredRows = delta.restored || [];
   }
-  const loss    = compareRows.filter(r => r.diff > 0).length;
-  const same    = compareRows.filter(r => r.dougaku).length;
-  const rev     = compareRows.filter(r => r.diff < 0).length;
-  const flipped = flippedRows.length;
+  flippedRows   = flippedRows2;
+  restoredRowsG = restoredRows;
+
+  const loss     = compareRows.filter(r => r.diff > 0).length;
+  const same     = compareRows.filter(r => r.dougaku).length;
+  const rev      = compareRows.filter(r => r.diff < 0).length;
+  const nFlipped = flippedRows.length;
+  const nRestored= restoredRows.length;
   document.getElementById("compare-stats").innerHTML = `
     <div class="stat clickable-stat" data-filter="loss"><span class="stat-num">${loss}</span><span class="stat-label">後発に切替で節約できる</span></div>
     <div class="stat clickable-stat" data-filter="same"><span class="stat-num">${same}</span><span class="stat-label">先発＝後発（同額）</span></div>
     <div class="stat clickable-stat" data-filter="rev"><span class="stat-num">${rev}</span><span class="stat-label">後発の方が高い</span></div>
-    ${flipped ? `<div class="stat clickable-stat" data-filter="flipped" style="border-left:3px solid #b91c1c;padding-left:12px"><span class="stat-num" style="color:#b91c1c">${flipped}</span><span class="stat-label" style="color:#b91c1c;font-weight:600">今回から後発≧先発になった ▶</span></div>` : ""}
+    ${nFlipped  ? `<div class="stat clickable-stat" data-filter="flipped"  style="border-left:3px solid #b91c1c;padding-left:12px"><span class="stat-num" style="color:#b91c1c">${nFlipped}</span><span class="stat-label" style="color:#b91c1c;font-weight:600">今回から後発≧先発 ▶</span></div>` : ""}
+    ${nRestored ? `<div class="stat clickable-stat" data-filter="restored" style="border-left:3px solid #1d4ed8;padding-left:12px"><span class="stat-num" style="color:#1d4ed8">${nRestored}</span><span class="stat-label" style="color:#1d4ed8;font-weight:600">今回から後発が再び安く ▶</span></div>` : ""}
   `;
   document.querySelectorAll(".clickable-stat").forEach(el => {
     el.addEventListener("click", () => {
@@ -365,8 +371,10 @@ function applyCompareFilter() {
   const kubun = document.getElementById("ckubun").value;
   const ctype = document.getElementById("ctype").value;
 
-  // flippedモードは別データソースを使う
-  const source = ctype === "flipped" ? flippedRows : compareRows;
+  // flipped/restoredモードは別データソースを使う
+  const source = ctype === "flipped" ? flippedRows
+               : ctype === "restored" ? restoredRowsG
+               : compareRows;
 
   let rows = source.filter(r => {
     if (kubun && r.kubun !== kubun) return false;
@@ -383,7 +391,7 @@ function applyCompareFilter() {
 
 function renderCompare() {
   const ctype = document.getElementById("ctype").value;
-  const isFlipped = ctype === "flipped";
+  const isFlipped = ctype === "flipped" || ctype === "restored";
   const slice = cmpFiltered.slice(0, (cmpState.page + 1) * PAGE);
   document.getElementById("compare-sub").textContent = `${cmpFiltered.length.toLocaleString()} 件表示`;
   document.getElementById("compare-tbody").innerHTML = slice.map(r => {
