@@ -61,15 +61,38 @@ def extract_version(filename: str) -> str:
 
 
 if __name__ == "__main__":
-    input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("tp20260401-01_01.xlsx")
-    output_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("docs/data")
+    # 引数: 入力ファイル(複数可) [出力ディレクトリ]
+    # 同じ収載日(_01〜_04)のファイルをまとめて1つのJSONにする
+    args = sys.argv[1:]
+    if not args:
+        args = sorted(Path(".").glob("tp20260401-01_0?.xlsx"))
 
-    version = extract_version(input_path.name)
-    records = parse_excel(input_path)
+    # 出力ディレクトリは末尾引数がディレクトリ指定の場合
+    output_dir = Path("docs/data")
+    input_paths = []
+    for a in args:
+        p = Path(a)
+        if p.is_dir():
+            output_dir = p
+        else:
+            input_paths.append(p)
+
+    if not input_paths:
+        print("入力ファイルが見つかりません")
+        sys.exit(1)
+
+    # バージョンは最初のファイル名から取得
+    version = extract_version(input_paths[0].name)
+
+    all_records = []
+    for p in sorted(input_paths):
+        recs = parse_excel(p)
+        all_records.extend(recs)
+        print(f"  {p.name}: {len(recs)} 件")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     out = output_dir / f"yakka_{version}.json"
     with open(out, "w", encoding="utf-8") as f:
-        json.dump({"version": version, "records": records}, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump({"version": version, "records": all_records}, f, ensure_ascii=False, separators=(",", ":"))
 
-    print(f"✓ {len(records)} 件 → {out}")
+    print(f"✓ 合計 {len(all_records)} 件 → {out}")

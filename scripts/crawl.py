@@ -47,9 +47,9 @@ def find_excel_on_detail(detail_url: str) -> list[str]:
 
     links = re.findall(r'href="([^"]*\.xlsx)"', html)
     full = [l if l.startswith("http") else BASE + l for l in links]
-    # _01_01.xlsx（品目リスト本体）を優先
-    main = [l for l in full if re.search(r'tp\d{8}-01_01\.xlsx', l)]
-    return main if main else full[:1]
+    # _01〜_04: 内用薬・注射薬・外用薬・歯科用薬剤
+    main = [l for l in full if re.search(r'tp\d{8}-01_0[1-4]\.xlsx', l)]
+    return main if main else []
 
 
 def download(url: str, dest: Path) -> bool:
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         print(f"検索: {detail_url}")
         excel_links = find_excel_on_detail(detail_url)
         for url in excel_links:
-            fname = re.search(r'(tp\d{8}-01_01\.xlsx)', url)
+            fname = re.search(r'(tp\d{8}-01_0[1-4]\.xlsx)', url)
             if not fname:
                 continue
             dest = xlsx_dir / fname.group(1)
@@ -102,11 +102,18 @@ if __name__ == "__main__":
         print("新しいファイルはありませんでした")
         sys.exit(0)
 
-    # パース
+    # 同じ収載日ごとにまとめてパース
     import subprocess
-    for xlsx in downloaded:
+    from itertools import groupby
+
+    def version_key(p):
+        m = re.search(r'tp(\d{8})', p.name)
+        return m.group(1) if m else ""
+
+    for ver, group in groupby(sorted(downloaded, key=version_key), key=version_key):
+        files = [str(p) for p in group]
         subprocess.run(
-            ["python3", "scripts/parse_excel.py", str(xlsx), str(data_dir)],
+            ["python3", "scripts/parse_excel.py"] + files + [str(data_dir)],
             check=True,
         )
 
