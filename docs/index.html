@@ -374,13 +374,9 @@ window.addEventListener("scroll", () => {
 
 function genNames(list) {
   if (!list || list.length === 0) return "—";
-  const SHOW = 3;
-  const items = list.slice(0, SHOW).map(g =>
+  return list.map(g =>
     `<div style="font-size:12px;white-space:nowrap">${g.hinmei} <span style="color:#888">${g.yakka.toFixed(1)}円</span></div>`
   ).join("");
-  const rest = list.length > SHOW
-    ? `<div style="font-size:11px;color:#888">他 ${list.length - SHOW} 品</div>` : "";
-  return items + rest;
 }
 
 // ===== 先発・後発比較 =====
