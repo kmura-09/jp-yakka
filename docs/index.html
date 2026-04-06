@@ -176,6 +176,8 @@
     td.card-badge { grid-column: 1; }
     td.card-diff  { grid-column: 2; text-align: right; font-size: 13px; align-self: end; }
     .hide-sp { display: none; }
+    td.card-names { display: block !important; grid-column: 1 / -1; padding-top: 4px; border-top: 1px solid #f0f0f0; margin-top: 2px; }
+    td.card-names div { white-space: normal !important; font-size: 11px; }
   }
 </style>
 </head>
@@ -481,7 +483,7 @@ function renderCompare() {
       <td class="hide-sp">${r.senpatu_maker}</td>
       <td class="num card-price">${senCell}</td>
       <td class="num">最安後発 ${genCell}</td>
-      <td class="hide-sp">${genNames(r.kouhatsu_list)}</td>
+      <td class="hide-sp card-names">${genNames(r.kouhatsu_list)}</td>
       <td class="num card-diff">${diffCell}</td>
     </tr>`;
   }).join("");
