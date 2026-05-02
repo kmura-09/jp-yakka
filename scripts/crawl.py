@@ -13,14 +13,10 @@ from datetime import datetime
 
 BASE = "https://www.mhlw.go.jp"
 
-# 既知のページURLパターン。年度ごとにパスが変わるので複数候補を試す。
+# 薬価基準収載品目ページのURL候補。年度ごとに /topics/{y}/04/tp{y}0401-01.html に置かれる。
 def candidate_urls() -> list[str]:
     year = datetime.now().year
-    urls = []
-    for y in [year, year - 1]:
-        for month in ["04", "06", "10", "12", "03"]:
-            urls.append(f"{BASE}/topics/{y}/{month}/")
-    return urls
+    return [f"{BASE}/topics/{y}/04/tp{y}0401-01.html" for y in [year, year - 1]]
 
 
 def find_excel_links(page_url: str) -> list[str]:
@@ -74,14 +70,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         detail_urls = sys.argv[3:]
     else:
-        # 自動探索
-        detail_urls = []
-        seen = set()
-        for base_url in candidate_urls():
-            for link in find_excel_links(base_url):
-                if link not in seen:
-                    seen.add(link)
-                    detail_urls.append(link)
+        # 自動探索: 候補ページに直接アクセスしてxlsxが取れるか確認
+        detail_urls = [u for u in candidate_urls() if find_excel_on_detail(u)]
         if not detail_urls:
             print("対象ページが見つかりませんでした")
             sys.exit(1)
