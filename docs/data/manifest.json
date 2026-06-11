@@ -1,0 +1,43 @@
+{
+  "versions": [
+    {
+      "label": "2026年5月20日",
+      "file": "data/yakka_20260520.json"
+    },
+    {
+      "label": "2026年4月15日",
+      "file": "data/yakka_20260415.json"
+    },
+    {
+      "label": "2026年3月18日",
+      "file": "data/yakka_20260318.json"
+    }
+  ],
+  "compares": [
+    {
+      "label": "2026年5月20日",
+      "file": "data/compare_20260520.json",
+      "deltaFile": "data/compare_delta_20260415_20260520.json"
+    },
+    {
+      "label": "2026年4月15日",
+      "file": "data/compare_20260415.json",
+      "deltaFile": "data/compare_delta_20260318_20260415.json"
+    },
+    {
+      "label": "2026年3月18日",
+      "file": "data/compare_20260318.json",
+      "deltaFile": null
+    }
+  ],
+  "diffs": [
+    {
+      "label": "2026年4月15日 → 2026年5月20日",
+      "file": "data/diff_20260415_20260520.json"
+    },
+    {
+      "label": "2026年3月18日 → 2026年4月15日",
+      "file": "data/diff_20260318_20260415.json"
+    }
+  ]
+}

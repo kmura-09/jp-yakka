@@ -382,11 +382,8 @@ function genNames(list) {
 }
 
 // ===== 先発・後発比較 =====
-const COMPARES = [
-  { label: "2026年4月1日",  file: "data/compare_20260401.json",
-    deltaFile: "data/compare_delta_20260318_20260401.json" },
-  { label: "2026年3月18日", file: "data/compare_20260318.json", deltaFile: null },
-];
+// バージョン一覧は data/manifest.json から動的に読み込む（ページ末尾の初期化処理を参照）
+let COMPARES = [];
 let compareRows = [], flippedRows = [], restoredRowsG = [], cmpFiltered = [];
 const cmpState = { col: "diff", dir: -1, page: 0, attr: "ccol" };
 
@@ -504,14 +501,15 @@ document.querySelectorAll("#panel-compare thead th[data-ccol]").forEach(th =>
   })
 );
 const cmpVerSel = document.getElementById("compare-version");
-COMPARES.forEach((c, i) => { const o = document.createElement("option"); o.value=i; o.textContent=c.label; cmpVerSel.appendChild(o); });
 cmpVerSel.addEventListener("change", () => loadCompare(COMPARES[+cmpVerSel.value]));
-loadCompare(COMPARES[0]);
+function initCompare() {
+  cmpVerSel.innerHTML = "";
+  COMPARES.forEach((c, i) => { const o = document.createElement("option"); o.value=i; o.textContent=c.label; cmpVerSel.appendChild(o); });
+  if (COMPARES.length) loadCompare(COMPARES[0]);
+}
 
 // ===== 改定前後の変化 =====
-const DIFFS = [
-  { label: "2026年3月18日 → 4月1日", file: "data/diff_20260318_20260401.json" },
-];
+let DIFFS = [];
 let diffRows = [], diffFiltered = [];
 const diffState = { col: null, dir: 1, page: 0 };
 
@@ -607,15 +605,15 @@ document.querySelectorAll("#panel-diff thead th[data-dcol]").forEach(th =>
   })
 );
 const diffVerSel = document.getElementById("diff-version");
-DIFFS.forEach(d => { const o = document.createElement("option"); o.value=d.file; o.textContent=d.label; diffVerSel.appendChild(o); });
 diffVerSel.addEventListener("change", () => loadDiff(diffVerSel.value));
-loadDiff(DIFFS[0].file);
+function initDiff() {
+  diffVerSel.innerHTML = "";
+  DIFFS.forEach(d => { const o = document.createElement("option"); o.value=d.file; o.textContent=d.label; diffVerSel.appendChild(o); });
+  if (DIFFS.length) loadDiff(DIFFS[0].file);
+}
 
 // ===== 薬価一覧 =====
-const VERSIONS = [
-  { label: "2026年4月1日",  file: "data/yakka_20260401.json" },
-  { label: "2026年3月18日", file: "data/yakka_20260318.json" },
-];
+let VERSIONS = [];
 let allRecords = [], listFiltered = [];
 const listState = { col: null, dir: 1, page: 0 };
 
@@ -670,9 +668,31 @@ document.querySelectorAll("#panel-list thead th[data-col]").forEach(th =>
   })
 );
 const verSel = document.getElementById("version");
-VERSIONS.forEach(v => { const o = document.createElement("option"); o.value=v.file; o.textContent=v.label; verSel.appendChild(o); });
 verSel.addEventListener("change", () => loadVersion(verSel.value));
-loadVersion(VERSIONS[0].file);
+function initList() {
+  verSel.innerHTML = "";
+  VERSIONS.forEach(v => { const o = document.createElement("option"); o.value=v.file; o.textContent=v.label; verSel.appendChild(o); });
+  if (VERSIONS.length) loadVersion(VERSIONS[0].file);
+}
+
+// ===== 初期化: manifest.json からバージョン一覧を読み込んで各ドロップダウンを構築 =====
+(async () => {
+  try {
+    const m = await fetch("data/manifest.json").then(r => r.json());
+    VERSIONS = m.versions || [];
+    COMPARES = m.compares || [];
+    DIFFS    = m.diffs    || [];
+  } catch (e) {
+    console.warn("manifest.json を読み込めませんでした。フォールバック表示を使用します。", e);
+    VERSIONS = [{ label: "2026年4月1日", file: "data/yakka_20260401.json" }];
+    COMPARES = [{ label: "2026年4月1日", file: "data/compare_20260401.json",
+                  deltaFile: "data/compare_delta_20260318_20260401.json" }];
+    DIFFS    = [{ label: "2026年3月18日 → 4月1日", file: "data/diff_20260318_20260401.json" }];
+  }
+  initList();
+  initCompare();
+  initDiff();
+})();
 </script>
 </body>
 </html>

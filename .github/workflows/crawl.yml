@@ -24,6 +24,18 @@ jobs:
       - name: クロール＆パース
         run: python3 scripts/crawl.py . docs/data
 
+      - name: 先発・後発比較を生成
+        run: python3 scripts/build_compare.py docs/data
+
+      - name: 比較の差分(flipped/restored)を生成
+        run: python3 scripts/build_compare_delta.py docs/data
+
+      - name: 改定前後の差分を生成
+        run: python3 scripts/diff_versions.py docs/data
+
+      - name: マニフェスト生成
+        run: python3 scripts/gen_manifest.py docs/data
+
       - name: 変更があればコミット
         run: |
           git config user.name  "github-actions[bot]"

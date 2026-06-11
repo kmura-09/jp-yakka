@@ -81,8 +81,10 @@ if __name__ == "__main__":
         print("入力ファイルが見つかりません")
         sys.exit(1)
 
-    # バージョンは最初のファイル名から取得
-    version = extract_version(input_paths[0].name)
+    # バージョンは最も新しい日付に合わせる。内用・注射・外用(_01〜_03)は更新のたびに
+    # 日付が振り直されるが、歯科用(_04)は改定が無い間は旧日付で据え置かれる。
+    # 最古日付を採用すると歯科の旧日付が勝ち、不完全な版として誤判定するため最大を取る。
+    version = max(extract_version(p.name) for p in input_paths)
 
     all_records = []
     for p in sorted(input_paths):

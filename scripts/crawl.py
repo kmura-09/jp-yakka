@@ -70,8 +70,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         detail_urls = sys.argv[3:]
     else:
-        # 自動探索: 候補ページに直接アクセスしてxlsxが取れるか確認
-        detail_urls = [u for u in candidate_urls() if find_excel_on_detail(u)]
+        # 自動探索: 候補ページ(今年→去年)を順に見て、最初にxlsxが取れたページだけを使う。
+        # 去年のページも併用すると旧年度の不完全な版が混入するため、現行ページに限定する。
+        detail_urls = next(([u] for u in candidate_urls() if find_excel_on_detail(u)), [])
         if not detail_urls:
             print("対象ページが見つかりませんでした")
             sys.exit(1)
@@ -92,19 +93,14 @@ if __name__ == "__main__":
         print("新しいファイルはありませんでした")
         sys.exit(0)
 
-    # 同じ収載日ごとにまとめてパース
+    # 内用・注射・外用・歯科(_01〜_04)を1つの収載版としてまとめてパースする。
+    # 歯科用(_04)は改定が無い間は旧日付で据え置かれるが、最新の収載版の一部として扱う。
+    # 日付ごとに分割すると歯科だけの不完全な版ができてしまうため、まとめて1ファイルにする。
     import subprocess
-    from itertools import groupby
-
-    def version_key(p):
-        m = re.search(r'tp(\d{8})', p.name)
-        return m.group(1) if m else ""
-
-    for ver, group in groupby(sorted(downloaded, key=version_key), key=version_key):
-        files = [str(p) for p in group]
-        subprocess.run(
-            ["python3", "scripts/parse_excel.py"] + files + [str(data_dir)],
-            check=True,
-        )
+    files = [str(p) for p in sorted(downloaded)]
+    subprocess.run(
+        ["python3", "scripts/parse_excel.py"] + files + [str(data_dir)],
+        check=True,
+    )
 
     print(f"\n完了: {len(downloaded)} ファイル処理")
