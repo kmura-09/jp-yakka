@@ -1,6 +1,10 @@
 {
   "versions": [
     {
+      "label": "2026年8月13日",
+      "file": "data/yakka_20260813.json"
+    },
+    {
       "label": "2026年8月1日",
       "file": "data/yakka_20260801.json"
     },
@@ -22,6 +26,11 @@
     }
   ],
   "compares": [
+    {
+      "label": "2026年8月13日",
+      "file": "data/compare_20260813.json",
+      "deltaFile": "data/compare_delta_20260801_20260813.json"
+    },
     {
       "label": "2026年8月1日",
       "file": "data/compare_20260801.json",
@@ -49,6 +58,10 @@
     }
   ],
   "diffs": [
+    {
+      "label": "2026年8月1日 → 2026年8月13日",
+      "file": "data/diff_20260801_20260813.json"
+    },
     {
       "label": "2026年6月12日 → 2026年8月1日",
       "file": "data/diff_20260612_20260801.json"
